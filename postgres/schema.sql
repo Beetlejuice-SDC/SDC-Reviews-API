@@ -63,3 +63,9 @@ CREATE TABLE characteristic_reviews (
 \COPY characteristic_reviews FROM 'data/characteristic_reviews.csv' DELIMITER ',' CSV HEADER;
 
 \COPY characteristics FROM 'data/characteristics.csv' DELIMITER ',' CSV HEADER;
+
+ALTER TABLE reviews ALTER COLUMN date TYPE TIMESTAMP USING to_timestamp(date/1000);
+
+SELECT setval('reviews_id_seq', (SELECT MAX(id) FROM reviews) + 1);
+SELECT setval('reviews_photos_id_seq', (SELECT MAX(id) FROM reviews_photos) + 1);
+SELECT setval('characteristic_reviews_id_seq', (SELECT MAX(id) FROM characteristic_reviews) + 1);

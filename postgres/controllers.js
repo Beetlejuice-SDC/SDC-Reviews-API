@@ -5,7 +5,6 @@ module.exports = {
     console.log('get meta: ', req.query)
   },
   getReviews: function(req, res) {
-    console.log('get reviews: ', req.query)
     const queries = {
       page: req.query.page || 1,
       count: req.query.count || 5,
@@ -14,7 +13,7 @@ module.exports = {
     }
     models.getReviews(queries, (err, data) => {
       if (err) {
-        console.log(err)
+        console.log('getReviews err: ', err)
         res.status(400).send(err)
       } else {
         res.send(data)
@@ -23,6 +22,14 @@ module.exports = {
   },
   postReview: function(req, res) {
     console.log('post review: ', req.body)
+    models.postReview(req.body, (err, data) => {
+      if (err) {
+        console.log('postReview err: ', err)
+        res.status(400).send(err)
+      } else {
+        res.send(data)
+      }
+    })
   },
   updateHelpful: function(req, res) {
     console.log('update helpful: ', req.params)
