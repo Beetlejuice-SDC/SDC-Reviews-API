@@ -69,19 +69,24 @@ module.exports = {
       console.log(reviews_photosQuery)
       console.log(characteristics_reviewsQuery)
 
-      db.query(reviews_photosQuery, (err, result) => {
+      db.query(characteristics_reviewsQuery, (err, result) => {
         if (err) {
-          cb(err)
+          cb('error uploading characteristics reviews')
         } else {
-          db.query(characteristics_reviewsQuery, (err, result) => {
-            if (err) {
-              cb('error uploading characteristics reviews')
-            } else {
-              cb(null, result)
-            }
-          })
+          if (photos.length > 0) {
+            db.query(reviews_photosQuery, (err, result) => {
+              if (err) {
+                cb(err)
+              } else {
+                cb(null, result)
+              }
+            })
+          } else {
+            cb(null, result)
+          }
         }
       })
+
     }
   })
  },

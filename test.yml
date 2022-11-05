@@ -1,0 +1,41 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 1
+      arrivalRate: 1
+      name: Warm up
+    # - duration: 120
+    #   arrivalRate: 5
+    #   rampTo: 50
+    #   name: Ramp up load
+    # - duration: 600
+    #   arrivalRate: 50
+    #   name: Sustained load
+
+scenarios:
+  - name: "Load reviews"
+    flow:
+      - get:
+          url: "/reviews/meta?product_id={{$randomNumber(1,1000011)}}"
+      - get:
+          url: "/reviews/?product_id={{$randomNumber(1,1000011)}}"
+          capture:
+            - json: "$.results[0].review_id"
+              as: "review_id"
+      - put:
+          url: "/reviews/{{ review_id }}/helpful"
+      - think: 5
+      - put:
+          url: "/reviews/{{ review_id }}/report"
+      - post:
+          url: "/reviews"
+          json:
+            productId: "{{$randomNumber(1,1000011)}}"
+            rating: 5
+            summary: "{{ $randomString() }}"
+            body: "{{ $randomString() }}"
+            recommend: true
+            name: "{{ $randomString() }}"
+            email: "{{ $randomString() }}"
+            photos: []
+            characteristics: {"1": 5}
