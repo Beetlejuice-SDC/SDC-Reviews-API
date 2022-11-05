@@ -1,8 +1,8 @@
 config:
   target: "http://localhost:3001"
   phases:
-    - duration: 1
-      arrivalRate: 1
+    - duration: 60
+      arrivalRate: 2
       name: Warm up
     # - duration: 120
     #   arrivalRate: 5
@@ -28,9 +28,9 @@ scenarios:
       - put:
           url: "/reviews/{{ review_id }}/report"
       - post:
-          url: "/reviews"
+          url: "/reviews/"
           json:
-            productId: "{{$randomNumber(1,1000011)}}"
+            product_id: "{{$randomNumber(1,1000011)}}"
             rating: 5
             summary: "{{ $randomString() }}"
             body: "{{ $randomString() }}"

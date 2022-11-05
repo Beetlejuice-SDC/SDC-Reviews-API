@@ -54,6 +54,7 @@ module.exports = {
 
   db.query(reviewsStr, (err, result) => {
     if (err) {
+      console.log('here')
       cb(err)
     } else {
       const review_id = result.rows[0].id
@@ -65,9 +66,6 @@ module.exports = {
         `INSERT INTO characteristic_reviews ( review_id, characteristic_id, value ) VALUES ${
           Object.keys(characteristics).map((key) => `(${review_id}, ${key}, ${characteristics[key]})`).join(', ')
         }`;
-
-      console.log(reviews_photosQuery)
-      console.log(characteristics_reviewsQuery)
 
       db.query(characteristics_reviewsQuery, (err, result) => {
         if (err) {
