@@ -36,11 +36,11 @@ CREATE TABLE reviews (
   summary text,
   body text,
   recommend boolean,
-  reported boolean,
+  reported boolean DEFAULT false,
   reviewer_name text,
   reviewer_email text,
-  response text,
-  helpfulness int
+  response text DEFAULT null,
+  helpfulness int DEFAULT 0
 );
 
 CREATE TABLE reviews_photos (
@@ -57,14 +57,12 @@ CREATE TABLE characteristic_reviews (
 );
 
 \COPY reviews FROM 'data/reviews.csv' DELIMITER ',' CSV HEADER;
-
 \COPY reviews_photos FROM 'data/reviews_photos.csv' DELIMITER ',' CSV HEADER;
-
 \COPY characteristic_reviews FROM 'data/characteristic_reviews.csv' DELIMITER ',' CSV HEADER;
-
 \COPY characteristics FROM 'data/characteristics.csv' DELIMITER ',' CSV HEADER;
 
 ALTER TABLE reviews ALTER COLUMN date TYPE TIMESTAMP USING to_timestamp(date/1000);
+ALTER TABLE reviews ALTER COLUMN date SET DEFAULT NOW();
 
 SELECT setval('reviews_id_seq', (SELECT MAX(id) FROM reviews) + 1);
 SELECT setval('reviews_photos_id_seq', (SELECT MAX(id) FROM reviews_photos) + 1);

@@ -81,5 +81,28 @@ module.exports = {
       })
     }
   })
+ },
+ updateHelpful: function(review_id, cb) {
+  const query = `UPDATE reviews SET helpfulness = helpfulness+1 WHERE id = ${review_id}`
+  db.query(query, (err, result) => {
+    if (err) {
+      cb(err)
+    } else {
+      cb(null, result)
+    }
+  })
+ },
+ reportReview: function(review_id, cb) {
+  const query = `UPDATE reviews SET reported = true WHERE id = ${review_id}`
+  db.query(query, (err, result) => {
+    if (err) {
+      cb(err)
+    } else {
+      cb(null, result)
+    }
+  })
+ },
+ getReviewsMeta: function(product_id, cb) {
+  //todo
  }
 }
