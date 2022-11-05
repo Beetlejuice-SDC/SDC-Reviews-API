@@ -14,12 +14,15 @@ module.exports = {
       reviews.date,
       reviews.reviewer_name,
       reviews.helpfulness,
-      json_agg(
-        json_strip_nulls(json_build_object(
-          'id', reviews_photos.id,
-          'url', reviews_photos.url
-        ))
-      ) AS photos
+      array_remove(array_agg(
+        CASE
+          WHEN reviews_photos.id IS NOT NULL THEN
+            jsonb_build_object(
+              'id', reviews_photos.id,
+              'url', reviews_photos.url
+            )
+        END
+      ), null) AS photos
     FROM reviews
     LEFT JOIN reviews_photos ON reviews_photos.review_id = reviews.id
     WHERE product_id=${product_id} AND reviews.reported=false
