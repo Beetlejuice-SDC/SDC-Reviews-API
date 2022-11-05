@@ -103,6 +103,27 @@ module.exports = {
   })
  },
  getReviewsMeta: function(product_id, cb) {
-  //todo
+  const result = {
+    product_id: product_id,
+    ratings: {},
+    recommended: {},
+    characteristics: {}
+  }
+  db.query(`SELECT recommend, COUNT(*) FROM reviews WHERE product_id = ${product_id} GROUP by recommend`)
+    .then((res) => res.rows.forEach((obj) => {result.recommended[obj.recommend] = Number(obj.count)}))
+  db.query(`SELECT rating, COUNT(*) FROM reviews WHERE product_id = ${product_id} GROUP BY rating`)
+    .then((res) => res.rows.forEach((obj) => {result.ratings[obj.rating] = Number(obj.count)}))
+    .then(() => {
+      db.query(`SELECT id, name FROM characteristics WHERE product_id = ${product_id}`)
+        .then(res => {
+          Promise.all(res.rows.map((row) => (
+            db.query(`SELECT AVG(value) FROM characteristic_reviews WHERE characteristic_id = ${row.id}`)
+              .then((res) => result.characteristics[row.name] = {id: row.id, value: res.rows[0].avg})
+          )))
+            .then(() => cb(null, result))
+            .catch(err => cb(err));
+        })
+        .catch(err => {cb(err)});
+    })
  }
 }
