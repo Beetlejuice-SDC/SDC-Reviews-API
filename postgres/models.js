@@ -109,29 +109,58 @@ module.exports = {
   })
  },
  getReviewsMeta: function(product_id, cb) {
-  const result = {
-    product_id: product_id,
-    ratings: {},
-    recommended: {},
-    characteristics: {}
-  }
-  db.query(`SELECT recommend, COUNT(*) FROM reviews WHERE product_id = ${product_id} GROUP by recommend`)
-    .then((res) => res.rows.forEach((obj) => {result.recommended[obj.recommend] = Number(obj.count)}))
-    .then(() => {
-      db.query(`SELECT rating, COUNT(*) FROM reviews WHERE product_id = ${product_id} GROUP BY rating`)
-        .then((res) => res.rows.forEach((obj) => {result.ratings[obj.rating] = Number(obj.count)}))
-        .then(() => {
-          db.query(`SELECT id, name FROM characteristics WHERE product_id = ${product_id}`)
-            .then(res => {
-              Promise.all(res.rows.map((row) => (
-                db.query(`SELECT AVG(value) FROM characteristic_reviews WHERE characteristic_id = ${row.id}`)
-                  .then((res) => result.characteristics[row.name] = {id: row.id, value: res.rows[0].avg})
-              )))
-                .then(() => cb(null, result))
-                .catch(err => cb(err));
-            })
-            .catch(err => {cb(err)});
-        })
-    })
+  let query = `SELECT json_build_object(
+    'product_id', ${product_id},
+    'ratings', (SELECT json_build_object(
+      1, (SELECT COUNT(rating) FROM reviews WHERE product_id = ${product_id} AND rating = 1),
+      2, (SELECT COUNT(rating) FROM reviews WHERE product_id = ${product_id} AND rating = 2),
+      3, (SELECT COUNT(rating) FROM reviews WHERE product_id = ${product_id} AND rating = 3),
+      4, (SELECT COUNT(rating) FROM reviews WHERE product_id = ${product_id} AND rating = 4),
+      5, (SELECT COUNT(rating) FROM reviews WHERE product_id = ${product_id} AND rating = 5)
+    )),
+    'recommended', (SELECT json_build_object(
+      false, (SELECT COUNT(recommend) FROM reviews WHERE product_id = ${product_id} AND recommend = 'f'),
+      true, (SELECT COUNT(recommend) FROM reviews WHERE product_id = ${product_id} AND recommend = 't')
+    )),
+    'characteristics', (SELECT json_object_agg(
+      name, (json_build_object(
+        'id', id,
+        'value', (select AVG(value) from characteristic_reviews where characteristic_id = characteristics.id)
+      ))
+    )FROM characteristics WHERE product_id = ${product_id})
+  )`
+
+  db.query(query, (err, res)=>{
+    if (err) {
+      console.log(err)
+    } else {
+      cb(null, res.rows[0].json_build_object)
+    }
+  })
+
+//   const result = {
+//     product_id: product_id,
+//     ratings: {},
+//     recommended: {},
+//     characteristics: {}
+//   }
+//   db.query(`SELECT recommend, COUNT(*) FROM reviews WHERE product_id = ${product_id} GROUP by recommend`)
+//     .then((res) => res.rows.forEach((obj) => {result.recommended[obj.recommend] = Number(obj.count)}))
+//     .then(() => {
+//       db.query(`SELECT rating, COUNT(*) FROM reviews WHERE product_id = ${product_id} GROUP BY rating`)
+//         .then((res) => res.rows.forEach((obj) => {result.ratings[obj.rating] = Number(obj.count)}))
+//         .then(() => {
+//           db.query(`SELECT id, name FROM characteristics WHERE product_id = ${product_id}`)
+//             .then(res => {
+//               Promise.all(res.rows.map((row) => (
+//                 db.query(`SELECT AVG(value) FROM characteristic_reviews WHERE characteristic_id = ${row.id}`)
+//                   .then((res) => result.characteristics[row.name] = {id: row.id, value: res.rows[0].avg})
+//               )))
+//                 .then(() => cb(null, result))
+//                 .catch(err => cb(err));
+//             })
+//             .catch(err => {cb(err)});
+//         })
+//     })
  }
 }

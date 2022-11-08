@@ -2,15 +2,15 @@ config:
   target: "http://localhost:3001"
   phases:
     - duration: 60
-      arrivalRate: 2
+      arrivalRate: 5
       name: Warm up
-    # - duration: 120
-    #   arrivalRate: 5
-    #   rampTo: 50
-    #   name: Ramp up load
-    # - duration: 600
-    #   arrivalRate: 50
-    #   name: Sustained load
+    - duration: 120
+      arrivalRate: 5
+      rampTo: 20
+      name: Ramp up load
+    - duration: 600
+      arrivalRate: 20
+      name: Sustained load
 
 scenarios:
   - name: "Load reviews"
@@ -19,14 +19,11 @@ scenarios:
           url: "/reviews/meta?product_id={{$randomNumber(1,1000011)}}"
       - get:
           url: "/reviews/?product_id={{$randomNumber(1,1000011)}}"
-          capture:
-            - json: "$.results[0].review_id"
-              as: "review_id"
       - put:
-          url: "/reviews/{{ review_id }}/helpful"
+          url: "/reviews/{{$randomNumber(1,5774952)}}/helpful"
       - think: 5
       - put:
-          url: "/reviews/{{ review_id }}/report"
+          url: "/reviews/{{$randomNumber(1,5774952)}}/report"
       - post:
           url: "/reviews/"
           json:
