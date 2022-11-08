@@ -15,7 +15,7 @@
   "homepage": "https://github.com/Beetlejuice-SDC/SDC-Reviews-API#readme",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postgres": "npx nodemon --watch postgres postgres/index.js",
+    "server-dev": "npx nodemon --watch postgres postgres/index.js",
     "mongoDB": "npx nodemon --watch mongoDB mongoDB/index.js"
   },
   "dependencies": {
