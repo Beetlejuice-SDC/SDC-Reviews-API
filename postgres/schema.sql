@@ -20,7 +20,7 @@ CREATE TABLE reviews (
   reported boolean DEFAULT false,
   reviewer_name text,
   reviewer_email text,
-  response text DEFAULT null,
+  response text,
   helpfulness int DEFAULT 0
 );
 
@@ -44,6 +44,8 @@ CREATE TABLE characteristic_reviews (
 
 ALTER TABLE reviews ALTER COLUMN date TYPE TIMESTAMP USING to_timestamp(date/1000);
 ALTER TABLE reviews ALTER COLUMN date SET DEFAULT NOW();
+
+UPDATE reviews SET response = null WHERE response = 'null';
 
 SELECT setval('reviews_id_seq', (SELECT MAX(id) FROM reviews) + 1);
 SELECT setval('reviews_photos_id_seq', (SELECT MAX(id) FROM reviews_photos) + 1);
